@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Simulador de Investimentos — Trabaio (web)</title>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="container">
+    <header>
+      <h1>Simulador de Investimentos</h1>
+      <p class="lead">Converta o projeto console em uma experiência web — simule juros compostos com contribuições mensais e exporte para CSV.</p>
+    </header>
+
+    <section class="controls" aria-labelledby="form-title">
+      <h2 id="form-title">Parâmetros da simulação</h2>
+      <form id="simForm" autocomplete="off">
+        <div class="row">
+          <label>Investimento inicial (R$)
+            <input id="initial" type="number" min="0" step="0.01" value="10000" required />
+          </label>
+
+          <label>Aporte mensal (R$)
+            <input id="monthly" type="number" min="0" step="0.01" value="500" required />
+          </label>
+        </div>
+
+        <div class="row">
+          <label>Taxa anual (%)
+            <input id="annualRate" type="number" min="0" step="0.01" value="8" required />
+          </label>
+
+          <label>Anos
+            <input id="years" type="number" min="1" step="1" value="20" required />
+          </label>
+        </div>
+
+        <div class="row">
+          <label>Capitalização por ano
+            <select id="compoundsPerYear">
+              <option value="12" selected>Mensal (12)</option>
+              <option value="4">Trimestral (4)</option>
+              <option value="1">Anual (1)</option>
+            </select>
+          </label>
+
+          <div class="actions">
+            <button id="runBtn" type="submit">Simular</button>
+            <button id="exportBtn" type="button">Exportar CSV</button>
+          </div>
+        </div>
+
+        <p id="error" class="error" role="alert" hidden></p>
+      </form>
+    </section>
+
+    <section class="results" aria-live="polite">
+      <h2>Resultados</h2>
+
+      <div class="summary" id="summary">
+        <!-- preenchido dinamicamente -->
+      </div>
+
+      <canvas id="balanceChart" height="120" aria-label="Gráfico de saldo ao longo do tempo"></canvas>
+
+      <div class="table-wrap">
+        <table id="resultsTable" aria-describedby="tableDesc">
+          <caption id="tableDesc">Detalhamento anual: ano, aporte no ano, juros no ano e saldo ao final do ano.</caption>
+          <thead>
+            <tr>
+              <th>Ano</th>
+              <th>Aporte no ano (R$)</th>
+              <th>Juros no ano (R$)</th>
+              <th>Saldo final (R$)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- preenchido dinamicamente -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <small>Baseado no projeto original em Java. Use como base, melhore e faça PR no repositório.</small>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
