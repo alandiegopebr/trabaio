@@ -1,95 +1,540 @@
-<!doctype html>
-<html lang="pt-BR">
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Simulador de Investimentos — Trabaio (web)</title>
-
-  <!-- Chart.js CDN -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WealthFlow - Simulador de Investimentos Inteligente</title>
+  
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-  <link rel="stylesheet" href="style.css" />
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="container">
-    <header>
-      <h1>Simulador de Investimentos</h1>
-      <p class="lead">Converta o projeto console em uma experiência web — simule juros compostos com contribuições mensais e exporte para CSV.</p>
-    </header>
+  <!-- Loading Screen -->
+  <div id="loadingScreen" class="loading-screen">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <h2>WealthFlow</h2>
+      <p>Carregando sua experiência de investimento...</p>
+    </div>
+  </div>
 
-    <section class="controls" aria-labelledby="form-title">
-      <h2 id="form-title">Parâmetros da simulação</h2>
-      <form id="simForm" autocomplete="off">
-        <div class="row">
-          <label>Investimento inicial (R$)
-            <input id="initial" type="number" min="0" step="0.01" value="10000" required />
-          </label>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <i class="fas fa-chart-line"></i>
+        <span>WealthFlow</span>
+      </div>
+      
+      <div class="nav-links" id="navLinks">
+        <a href="#" class="nav-link active" data-section="mainContent">
+          <i class="fas fa-calculator"></i>
+          <span>Simulador</span>
+        </a>
+        <a href="#" class="nav-link" data-section="historySection" id="historyNav" style="display: none;">
+          <i class="fas fa-history"></i>
+          <span>Meu Histórico</span>
+        </a>
+        <a href="#" class="nav-link" data-section="tutorialSection">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Tutorial</span>
+        </a>
+      </div>
 
-          <label>Aporte mensal (R$)
-            <input id="monthly" type="number" min="0" step="0.01" value="500" required />
-          </label>
+      <div class="nav-actions">
+        <button id="themeToggle" class="btn-icon" title="Alternar tema">
+          <i class="fas fa-moon"></i>
+        </button>
+        
+        <div id="authButtons" class="auth-buttons">
+          <button id="loginBtn" class="btn-outline">
+            <i class="fas fa-sign-in-alt"></i>
+            Entrar
+          </button>
+          <button id="registerBtn" class="btn-primary">
+            <i class="fas fa-user-plus"></i>
+            Cadastrar
+          </button>
         </div>
 
-        <div class="row">
-          <label>Taxa anual (%)
-            <input id="annualRate" type="number" min="0" step="0.01" value="8" required />
-          </label>
-
-          <label>Anos
-            <input id="years" type="number" min="1" step="1" value="20" required />
-          </label>
+        <div id="userMenu" class="user-menu" style="display: none;">
+          <div class="user-dropdown">
+            <button class="user-trigger">
+              <img id="userAvatar" src="" alt="Avatar" class="user-avatar">
+              <span id="userName"></span>
+              <i class="fas fa-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu">
+              <a href="#" class="dropdown-item" data-section="profileSection">
+                <i class="fas fa-user"></i>
+                Meu Perfil
+              </a>
+              <a href="#" class="dropdown-item" data-section="historySection">
+                <i class="fas fa-history"></i>
+                Meu Histórico
+              </a>
+              <a href="#" class="dropdown-item" data-section="favoritesSection">
+                <i class="fas fa-star"></i>
+                Favoritos
+              </a>
+              <div class="dropdown-divider"></div>
+              <button id="logoutBtn" class="dropdown-item logout">
+                <i class="fas fa-sign-out-alt"></i>
+                Sair
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="row">
-          <label>Capitalização por ano
-            <select id="compoundsPerYear">
-              <option value="12" selected>Mensal (12)</option>
-              <option value="4">Trimestral (4)</option>
-              <option value="1">Anual (1)</option>
-            </select>
-          </label>
+      <button class="mobile-toggle" id="mobileToggle">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </nav>
 
-          <div class="actions">
-            <button id="runBtn" type="submit">Simular</button>
-            <button id="exportBtn" type="button">Exportar CSV</button>
+  <!-- Main Content -->
+  <main class="main-container">
+    <!-- Auth Modals -->
+    <div id="authModals">
+      <!-- Login Modal -->
+      <div id="loginModal" class="modal" hidden>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Entrar na sua conta</h2>
+            <button class="modal-close" data-modal="loginModal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <form id="loginForm" class="modal-form">
+            <div class="form-group">
+              <label for="loginEmail">Email</label>
+              <input type="email" id="loginEmail" required placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Senha</label>
+              <input type="password" id="loginPassword" required placeholder="Sua senha">
+            </div>
+            <button type="submit" class="btn-primary btn-block">
+              <i class="fas fa-sign-in-alt"></i>
+              Entrar
+            </button>
+          </form>
+          <div class="modal-footer">
+            <p>Não tem uma conta? <button class="text-link" data-from="loginModal" data-to="registerModal">Cadastre-se</button></p>
+          </div>
+          <p id="loginError" class="error-message" hidden></p>
+        </div>
+      </div>
+
+      <!-- Register Modal -->
+      <div id="registerModal" class="modal" hidden>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Criar nova conta</h2>
+            <button class="modal-close" data-modal="registerModal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <form id="registerForm" class="modal-form">
+            <div class="form-group">
+              <label for="registerName">Nome completo</label>
+              <input type="text" id="registerName" required placeholder="Seu nome completo">
+            </div>
+            <div class="form-group">
+              <label for="registerEmail">Email</label>
+              <input type="email" id="registerEmail" required placeholder="seu@email.com">
+            </div>
+            <div class="form-group">
+              <label for="registerPassword">Senha</label>
+              <input type="password" id="registerPassword" minlength="6" required placeholder="Mínimo 6 caracteres">
+            </div>
+            <div class="form-group">
+              <label for="registerConfirmPassword">Confirmar senha</label>
+              <input type="password" id="registerConfirmPassword" required placeholder="Digite novamente sua senha">
+            </div>
+            <button type="submit" class="btn-primary btn-block">
+              <i class="fas fa-user-plus"></i>
+              Criar conta
+            </button>
+          </form>
+          <div class="modal-footer">
+            <p>Já tem uma conta? <button class="text-link" data-from="registerModal" data-to="loginModal">Faça login</button></p>
+          </div>
+          <p id="registerError" class="error-message" hidden></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Simulator Section -->
+    <section id="mainContent" class="content-section active">
+      <div class="hero-section">
+        <div class="hero-content">
+          <h1 class="hero-title">Simule e Planeje seu Futuro Financeiro</h1>
+          <p class="hero-subtitle">Descubra o poder dos juros compostos e transforme seus investimentos com nossa calculadora inteligente</p>
+          <div class="hero-stats">
+            <div class="stat-card">
+              <i class="fas fa-chart-line"></i>
+              <div>
+                <h3>+15.2k</h3>
+                <p>Simulações realizadas</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-users"></i>
+              <div>
+                <h3>+8.7k</h3>
+                <p>Investidores ativos</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-medal"></i>
+              <div>
+                <h3>98%</h3>
+                <p>Satisfação dos usuários</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="simulator-container">
+        <div class="simulator-grid">
+          <!-- Controls Panel -->
+          <div class="controls-panel">
+            <div class="panel-header">
+              <h2><i class="fas fa-sliders-h"></i> Parâmetros da Simulação</h2>
+              <div class="panel-actions">
+                <button id="saveBtn" class="btn-outline" style="display: none;" title="Salvar simulação">
+                  <i class="fas fa-bookmark"></i>
+                </button>
+                <button id="resetBtn" class="btn-outline" title="Redefinir valores">
+                  <i class="fas fa-redo"></i>
+                </button>
+              </div>
+            </div>
+
+            <form id="simForm" class="simulation-form">
+              <div class="input-group">
+                <label for="initial" class="input-label">
+                  <i class="fas fa-wallet"></i>
+                  Investimento Inicial
+                </label>
+                <div class="input-with-suffix">
+                  <input type="number" id="initial" min="0" step="100" value="10000" required>
+                  <span class="input-suffix">R$</span>
+                </div>
+                <div class="input-range">
+                  <input type="range" id="initialRange" min="0" max="100000" step="1000" value="10000" class="range-slider">
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="monthly" class="input-label">
+                  <i class="fas fa-calendar-plus"></i>
+                  Aporte Mensal
+                </label>
+                <div class="input-with-suffix">
+                  <input type="number" id="monthly" min="0" step="50" value="500" required>
+                  <span class="input-suffix">R$</span>
+                </div>
+                <div class="input-range">
+                  <input type="range" id="monthlyRange" min="0" max="5000" step="50" value="500" class="range-slider">
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="annualRate" class="input-label">
+                  <i class="fas fa-percentage"></i>
+                  Taxa de Juros Anual
+                </label>
+                <div class="input-with-suffix">
+                  <input type="number" id="annualRate" min="0" step="0.1" value="8" required>
+                  <span class="input-suffix">%</span>
+                </div>
+                <div class="input-range">
+                  <input type="range" id="annualRateRange" min="0" max="30" step="0.1" value="8" class="range-slider">
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="years" class="input-label">
+                  <i class="fas fa-clock"></i>
+                  Período de Investimento
+                </label>
+                <div class="input-with-suffix">
+                  <input type="number" id="years" min="1" max="50" value="20" required>
+                  <span class="input-suffix">anos</span>
+                </div>
+                <div class="input-range">
+                  <input type="range" id="yearsRange" min="1" max="50" value="20" class="range-slider">
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="compoundsPerYear" class="input-label">
+                  <i class="fas fa-calculator"></i>
+                  Frequência de Capitalização
+                </label>
+                <select id="compoundsPerYear" class="select-input">
+                  <option value="12">Mensal</option>
+                  <option value="4">Trimestral</option>
+                  <option value="2">Semestral</option>
+                  <option value="1">Anual</option>
+                </select>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-primary btn-large">
+                  <i class="fas fa-play"></i>
+                  Executar Simulação
+                </button>
+                <button type="button" id="exportBtn" class="btn-outline">
+                  <i class="fas fa-download"></i>
+                  Exportar
+                </button>
+              </div>
+
+              <p id="error" class="error-message" role="alert" hidden></p>
+            </form>
+          </div>
+
+          <!-- Results Panel -->
+          <div class="results-panel">
+            <div class="results-header">
+              <h2><i class="fas fa-chart-bar"></i> Resultados da Simulação</h2>
+              <div class="results-actions">
+                <button id="toggleChart" class="btn-icon" title="Alternar visualização">
+                  <i class="fas fa-chart-line"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-grid" id="summary">
+              <!-- Dynamic content -->
+            </div>
+
+            <!-- Chart Container -->
+            <div class="chart-container">
+              <canvas id="balanceChart" height="300"></canvas>
+            </div>
+
+            <!-- Results Table -->
+            <div class="table-container">
+              <div class="table-header">
+                <h3>Detalhamento Anual</h3>
+                <div class="table-controls">
+                  <input type="text" id="tableSearch" placeholder="Buscar ano..." class="search-input">
+                  <button id="toggleTable" class="btn-icon">
+                    <i class="fas fa-chevron-down"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="table-wrapper" id="tableWrapper">
+                <table id="resultsTable" class="results-table">
+                  <thead>
+                    <tr>
+                      <th>Ano</th>
+                      <th>Total Investido</th>
+                      <th>Juros Acumulados</th>
+                      <th>Saldo Final</th>
+                      <th>Rentabilidade</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableBody">
+                    <!-- Dynamic content -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- History Section -->
+    <section id="historySection" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-history"></i> Meu Histórico de Simulações</h1>
+        <p>Gerencie e acompanhe todas as suas simulações salvas</p>
+      </div>
+      <div id="savedSimulations" class="simulations-grid">
+        <!-- Dynamic content -->
+      </div>
+    </section>
+
+    <!-- Favorites Section -->
+    <section id="favoritesSection" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-star"></i> Simulações Favoritas</h1>
+        <p>Suas simulações mais importantes e frequentes</p>
+      </div>
+      <div id="favoritesList" class="simulations-grid">
+        <!-- Dynamic content -->
+      </div>
+    </section>
+
+    <!-- Profile Section -->
+    <section id="profileSection" class="content-section">
+      <div class="profile-container">
+        <div class="profile-sidebar">
+          <div class="profile-card">
+            <div class="profile-avatar">
+              <img id="profileAvatar" src="" alt="Avatar">
+              <button class="avatar-edit">
+                <i class="fas fa-camera"></i>
+              </button>
+            </div>
+            <h2 id="profileName"></h2>
+            <p id="profileEmail"></p>
+            <div class="profile-stats">
+              <div class="profile-stat">
+                <strong id="simulationsCount">0</strong>
+                <span>Simulações</span>
+              </div>
+              <div class="profile-stat">
+                <strong id="favoritesCount">0</strong>
+                <span>Favoritos</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <p id="error" class="error" role="alert" hidden></p>
-      </form>
+        <div class="profile-content">
+          <div class="profile-section">
+            <h3>Informações Pessoais</h3>
+            <form id="profileForm" class="profile-form">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="profileNameInput">Nome completo</label>
+                  <input type="text" id="profileNameInput" required>
+                </div>
+                <div class="form-group">
+                  <label for="profileEmailInput">Email</label>
+                  <input type="email" id="profileEmailInput" required>
+                </div>
+              </div>
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i>
+                Salvar alterações
+              </button>
+            </form>
+          </div>
+
+          <div class="profile-section">
+            <h3>Preferências</h3>
+            <div class="preferences">
+              <div class="preference-item">
+                <label class="toggle-label">
+                  <input type="checkbox" id="darkModePref">
+                  <span class="toggle-slider"></span>
+                  <span>Modo escuro</span>
+                </label>
+              </div>
+              <div class="preference-item">
+                <label class="toggle-label">
+                  <input type="checkbox" id="autoSavePref">
+                  <span class="toggle-slider"></span>
+                  <span>Salvar automaticamente</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <section class="results" aria-live="polite">
-      <h2>Resultados</h2>
-
-      <div class="summary" id="summary">
-        <!-- preenchido dinamicamente -->
+    <!-- Tutorial Section -->
+    <section id="tutorialSection" class="content-section">
+      <div class="section-header">
+        <h1><i class="fas fa-graduation-cap"></i> Como Usar o Simulador</h1>
+        <p>Aprenda a aproveitar ao máximo todas as funcionalidades</p>
       </div>
-
-      <canvas id="balanceChart" height="120" aria-label="Gráfico de saldo ao longo do tempo"></canvas>
-
-      <div class="table-wrap">
-        <table id="resultsTable" aria-describedby="tableDesc">
-          <caption id="tableDesc">Detalhamento anual: ano, aporte no ano, juros no ano e saldo ao final do ano.</caption>
-          <thead>
-            <tr>
-              <th>Ano</th>
-              <th>Aporte no ano (R$)</th>
-              <th>Juros no ano (R$)</th>
-              <th>Saldo final (R$)</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- preenchido dinamicamente -->
-          </tbody>
-        </table>
+      
+      <div class="tutorial-steps">
+        <div class="tutorial-step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Configure seus investimentos</h3>
+            <p>Defina o valor inicial, aportes mensais, taxa de juros e período. Use os sliders para ajustes rápidos.</p>
+          </div>
+        </div>
+        
+        <div class="tutorial-step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Execute a simulação</h3>
+            <p>Clique em "Executar Simulação" para calcular o crescimento do seu investimento ao longo do tempo.</p>
+          </div>
+        </div>
+        
+        <div class="tutorial-step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Analise os resultados</h3>
+            <p>Visualize gráficos interativos, tabelas detalhadas e métricas importantes para sua tomada de decisão.</p>
+          </div>
+        </div>
+        
+        <div class="tutorial-step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Salve e compare</h3>
+            <p>Crie uma conta para salvar suas simulações, marcar favoritos e acompanhar seu progresso.</p>
+          </div>
+        </div>
       </div>
     </section>
-
-    <footer class="footer">
-      <small>Baseado no projeto original em Java. Use como base, melhore e faça PR no repositório.</small>
-    </footer>
   </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <i class="fas fa-chart-line"></i>
+          <span>WealthFlow</span>
+        </div>
+        <p>Ferramenta profissional de simulação de investimentos para ajudar você a tomar decisões financeiras inteligentes.</p>
+      </div>
+      
+      <div class="footer-links">
+        <div class="footer-column">
+          <h4>Recursos</h4>
+          <a href="#simulator">Simulador</a>
+          <a href="#tutorial">Tutorial</a>
+          <a href="#blog">Blog</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Suporte</h4>
+          <a href="#help">Ajuda</a>
+          <a href="#contact">Contato</a>
+          <a href="#privacy">Privacidade</a>
+        </div>
+        
+        <div class="footer-column">
+          <h4>Legal</h4>
+          <a href="#terms">Termos de Uso</a>
+          <a href="#privacy">Política de Privacidade</a>
+          <a href="#cookies">Cookies</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>&copy; 2024 WealthFlow. Todos os direitos reservados.</p>
+    </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>
