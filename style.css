@@ -1,0 +1,127 @@
+:root{
+  --maxwidth: 980px;
+  --accent: #0e6efd;
+  --muted: #6b7280;
+  --bg: #f7fafc;
+  --card: #ffffff;
+  --radius: 10px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#f3f6fb, #ffffff 40%);
+  color:#0f172a;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding:32px 16px;
+}
+
+.container{
+  max-width:var(--maxwidth);
+  margin:0 auto;
+  background:var(--card);
+  border-radius:var(--radius);
+  padding:28px;
+  box-shadow:0 6px 30px rgba(16,24,40,0.08);
+}
+
+header h1{margin:0 0 6px;font-size:1.6rem}
+.lead{margin:0 0 20px;color:var(--muted)}
+
+.controls{margin-bottom:18px}
+.controls h2{font-size:1.05rem;margin:0 0 10px}
+
+form .row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+}
+
+label{
+  flex:1;
+  min-width:180px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-size:0.95rem;
+  color:#0f172a;
+}
+
+input[type="number"], select{
+  padding:10px 12px;
+  border-radius:8px;
+  border:1px solid #e6e9ef;
+  background:white;
+  font-size:1rem;
+  outline:none;
+}
+
+.actions{display:flex;gap:8px;align-items:center}
+button{
+  padding:10px 14px;
+  border-radius:8px;
+  border:0;
+  cursor:pointer;
+  font-weight:600;
+}
+#runBtn{background:var(--accent); color:white}
+#exportBtn{background:#eef2ff;color:var(--accent)}
+
+.error{color:#b91c1c;margin:6px 0 0}
+
+.results h2{margin-top:0;font-size:1.05rem}
+
+.summary{
+  display:flex;
+  gap:12px;
+  margin:12px 0;
+  flex-wrap:wrap;
+}
+
+.summary .card{
+  padding:10px 12px;
+  background:#f8fafc;
+  border-radius:8px;
+  min-width:160px;
+}
+
+.table-wrap{
+  overflow:auto;
+  margin-top:12px;
+  border-radius:8px;
+  border:1px solid #eef2f6;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:640px;
+}
+thead th{
+  text-align:left;
+  padding:10px 12px;
+  background:#fbfdff;
+  border-bottom:1px solid #eef2f6;
+  font-weight:600;
+}
+tbody td{
+  padding:10px 12px;
+  border-bottom:1px solid #f1f5f9;
+}
+
+.footer{
+  margin-top:18px;
+  color:var(--muted);
+  text-align:center;
+  font-size:0.9rem;
+}
+
+/* responsivo */
+@media (max-width:640px){
+  .container{padding:18px}
+  header h1{font-size:1.2rem}
+}
